@@ -1,0 +1,5 @@
+PROVIDER_NAME = "Google AI"
+PROVIDER_HOMEPAGE = "https://ai.google.dev"
+PLATFORM = "google"
+API_KEY_ENV_VAR = "GOOGLE_API_KEY"
+API_KEY_PATTERN = r"^AIza[A-Za-z0-9_-]{30,}$"
