@@ -1,0 +1,40 @@
+id = "imagen-4.0"
+label = "Imagen 4.0"
+category = "IMG"
+platform = "google"
+endpoint = "imagen-4.0-generate-001"
+description = "Google's latest image generation model. Produces photorealistic images from text prompts with advanced composition, lighting, and detail. Supports RAI safety reasoning."
+
+[pricing]
+base_cost = 0.04
+currency = "USD"
+
+[params.aspect_ratio]
+label = "Aspect Ratio"
+type = "select"
+default = "16:9"
+optional = true
+options = [
+  { value = "1:1",   label = "1:1 · Square" },
+  { value = "3:4",   label = "3:4 · Portrait" },
+  { value = "4:3",   label = "4:3 · Classic" },
+  { value = "9:16",  label = "9:16 · Vertical" },
+  { value = "16:9",  label = "16:9 · Landscape · Standard" },
+  { value = "21:9",  label = "21:9 · Ultrawide · Cinematic" },
+]
+
+[params.number_of_images]
+label = "Number of Images"
+type = "integer"
+default = 1
+min = 1
+max = 4
+
+[params.output_mime_type]
+label = "Output Format"
+type = "select"
+default = "image/jpeg"
+options = [
+  { value = "image/jpeg", label = "JPEG · Default" },
+  { value = "image/png",  label = "PNG · Lossless" },
+]
