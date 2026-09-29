@@ -19,8 +19,8 @@ class TestDatatypes:
         assert f.metadata == {}
 
     def test_outputfile_defaults(self):
-        o = OutputFile(bullet_path=Path("test.md"))
-        assert o.bullet_path == Path("test.md")
+        o = OutputFile(source_path=Path("test.md"))
+        assert o.source_path == Path("test.md")
         assert o.path is None
         assert o.status == "ok"
         assert o.error_msg == ""
@@ -29,7 +29,7 @@ class TestDatatypes:
 
     def test_outputfile_error_status(self):
         o = OutputFile(
-            bullet_path=Path("test.md"),
+            source_path=Path("test.md"),
             status="error",
             error_msg="timeout",
             media_type="text",
@@ -147,7 +147,7 @@ class TestEngineRun:
                 engine.run([InputFile(path=Path("b.md"), prompt="test")])
 
             assert len(progress_calls) >= 1
-            assert "Processing bullet" in progress_calls[0]
+            assert "Processing Markdown file" in progress_calls[0]
 
     def test_applies_prefix_suffix(self, tmp_path):
         with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_key"}):
@@ -193,7 +193,7 @@ class TestEngineRun:
                 assert results[0].status == "error"
                 assert "Empty prompt" in results[0].error_msg
 
-    def test_per_bullet_error_returns_error_outputfile(self, tmp_path):
+    def test_per_markdown_file_error_returns_error_outputfile(self, tmp_path):
         with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_key"}):
             mock_genai = MagicMock()
             mock_client = MagicMock()
@@ -231,11 +231,11 @@ class TestEngineRun:
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
                 )
-                bullets = [
+                markdown_files = [
                     InputFile(path=Path(f"b{i}.md"), prompt="test")
                     for i in range(3)
                 ]
-                results = engine.run(bullets)
+                results = engine.run(markdown_files)
                 statuses = [r.status for r in results]
                 assert statuses.count("ok") == 2
                 assert statuses.count("error") == 1
