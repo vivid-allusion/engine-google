@@ -1,15 +1,15 @@
 ## Architecture: Engine SDK Wrapper
 
 This repo is an **Engine** in the studiolot ecosystem. It wraps the
-**Google AI** API and exposes a uniform interface that Vehicles call.
+**Google AI** API and exposes a uniform interface that Generators call.
 
 ### The layers
 
 ```
-studiolot (TUI) → Vehicle (script) → **Google AI Engine** → Provider API
+studiolot (TUI) → Generator (script) → **Google AI Engine** → Provider API
 ```
 
-Vehicles like Frame Composer and Motion Conductor are SDK-agnostic. They
+Generators like Image Generator and Video Generator are SDK-agnostic. They
 discover this Engine, load it via `engine_loader.py`, and call
 `engine.run(inputs)`. This Engine handles all **Google AI**-specific logic.
 
@@ -19,7 +19,7 @@ discover this Engine, load it via `engine_loader.py`, and call
   constructor. It only stores: profile dict, output_dir, api_key,
   on_progress callback.
 - **`Engine.run(inputs: list[InputFile]) -> list[OutputFile]`** is the ONLY
-  entry point Vehicles call. Returns ALL results — success and failure —
+  entry point Generators call. Returns ALL results — success and failure —
   as OutputFile objects. Never raises for per-Markdown-file failures.
 - **`EngineError`** is for unrecoverable pre-flight failures only: missing
   API key, invalid profile, provider auth rejection.
@@ -31,7 +31,7 @@ discover this Engine, load it via `engine_loader.py`, and call
 - **`endpoints/`** TOMLs are the canonical model catalog. One file per model,
   defining valid parameter ranges.
 - **`profiles/standby/`** contains publishable YAML profiles. When installed,
-  these are seeded into Vehicle repos' `USER-FILES/02.STANDBY/`.
+  these are seeded into Generator repos' `USER-FILES/02.STANDBY/`.
 
 ### Provider details
 
@@ -44,7 +44,7 @@ discover this Engine, load it via `engine_loader.py`, and call
 
 ### Engine discovery
 
-Vehicles find this Engine via `engine_loader.py`:
+Generators find this Engine via `engine_loader.py`:
 - Repo directory: `engine-google` 
 - Python package: `engine_google`
 - `engine_loader.py` handles the hyphen→underscore mapping

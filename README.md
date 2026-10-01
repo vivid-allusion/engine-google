@@ -2,7 +2,7 @@
 
 Engine wrapping the [Google Generative AI](https://ai.google.dev) API
 (google-genai SDK) behind studiolot's uniform Engine interface.
-Vehicles call this Engine instead of importing the google-genai SDK
+Generators call this Engine instead of importing the google-genai SDK
 directly. Supports Gemini models for text generation and vision tasks.
 
 ## Quick Start
