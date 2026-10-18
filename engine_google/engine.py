@@ -25,6 +25,7 @@ class Engine:
         self._on_progress = on_progress
         self._prefix = profile.get("prompt_prefix", "")
         self._suffix = profile.get("prompt_suffix", "")
+        self._concurrency = profile.get("concurrency", 1)
 
     def run(self, inputs: list[InputFile]) -> list[OutputFile]:
         self._validate_preflight()
@@ -36,6 +37,11 @@ class Engine:
         params = dict(self._profile.get("parameters", {}))
         media_type = self._profile.get("media_type", "")
         self._output_dir.mkdir(parents=True, exist_ok=True)
+
+        if self._concurrency > 1:
+            from . import runner
+
+            return runner.run_batch(self, inputs)
 
         results: list[OutputFile] = []
         total = len(inputs)
@@ -68,7 +74,7 @@ class Engine:
                         media_type=media_type,
                     )
                 else:
-                    ts = datetime.now().strftime("%y%m%d_%H%M%S")
+                    ts = self._now_string()
                     dest = self._output_dir / f"{ts}-{item.path.stem}-{idx}.txt"
                     dest.write_text(response.text, encoding="utf-8")
                     output = OutputFile(
@@ -93,6 +99,15 @@ class Engine:
     def _validate_preflight(self):
         if not self._profile.get("endpoint"):
             raise EngineError("Missing 'endpoint' in profile")
+        if (
+            isinstance(self._concurrency, bool)
+            or not isinstance(self._concurrency, int)
+            or self._concurrency < 1
+        ):
+            raise EngineError(
+                f"Invalid 'concurrency' in profile: {self._concurrency!r} — "
+                "must be a whole number >= 1"
+            )
         try:
             from google import genai  # noqa: F401
         except ImportError:
@@ -108,6 +123,9 @@ class Engine:
         if self._api_key:
             return self._api_key
         return os.environ.get(self.API_KEY_ENV_VAR, "")
+
+    def _now_string(self) -> str:
+        return datetime.now().strftime("%y%m%d_%H%M%S")
 
     def _build_contents(
         self, prompt: str, item: InputFile, media_type: str
