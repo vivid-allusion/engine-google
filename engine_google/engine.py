@@ -32,7 +32,17 @@ class Engine:
 
         from google import genai
 
-        client = genai.Client(api_key=self._resolve_api_key())
+        if self._concurrency > 1:
+            from google.genai import types
+
+            client = genai.Client(
+                api_key=self._resolve_api_key(),
+                http_options=types.HttpOptions(
+                    retry_options=types.HttpRetryOptions(attempts=1)
+                ),
+            )
+        else:
+            client = genai.Client(api_key=self._resolve_api_key())
         endpoint = self._profile["endpoint"]
         params = dict(self._profile.get("parameters", {}))
         media_type = self._profile.get("media_type", "")
@@ -41,7 +51,7 @@ class Engine:
         if self._concurrency > 1:
             from . import runner
 
-            return runner.run_batch(self, inputs)
+            return runner.run_batch(self, inputs, client)
 
         results: list[OutputFile] = []
         total = len(inputs)
