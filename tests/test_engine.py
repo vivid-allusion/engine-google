@@ -102,7 +102,7 @@ class TestEnginePreflight:
     @patch.dict("os.environ", {}, clear=True)
     def test_missing_api_key_raises(self):
         mock_genai = MagicMock()
-        with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+        with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
             engine = Engine({"endpoint": "gemini-2.0-flash"}, "/tmp/out")
             with pytest.raises(EngineError, match="not set"):
                 engine.run([])
@@ -119,8 +119,12 @@ class TestEngineRun:
         with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_key"}):
             mock_genai = MagicMock()
             mock_client = MagicMock()
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            mock_types = MagicMock()
+            mock_types.Part.from_text.side_effect = lambda *, text: type("P", (), {"text": text})()
+            mock_genai.types = mock_types
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
@@ -135,10 +139,11 @@ class TestEngineRun:
             mock_response = MagicMock()
             mock_response.text = "Generated text"
             mock_client.models.generate_content.return_value = mock_response
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
 
             progress_calls = []
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
@@ -156,8 +161,12 @@ class TestEngineRun:
             mock_response = MagicMock()
             mock_response.text = "Result"
             mock_client.models.generate_content.return_value = mock_response
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            mock_types = MagicMock()
+            mock_types.Part.from_text.side_effect = lambda *, text: type("P", (), {"text": text})()
+            mock_genai.types = mock_types
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {
                         "endpoint": "gemini-2.0-flash",
@@ -177,8 +186,9 @@ class TestEngineRun:
         with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_key"}):
             mock_genai = MagicMock()
             mock_client = MagicMock()
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {
                         "endpoint": "gemini-2.0-flash",
@@ -200,8 +210,9 @@ class TestEngineRun:
             mock_client.models.generate_content.side_effect = RuntimeError(
                 "API timeout"
             )
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
@@ -225,8 +236,9 @@ class TestEngineRun:
                     r.text = "ok"
                     responses.append(r)
             mock_client.models.generate_content.side_effect = responses
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
@@ -247,8 +259,9 @@ class TestEngineRun:
             mock_response = MagicMock()
             mock_response.text = "Generated text output"
             mock_client.models.generate_content.return_value = mock_response
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
@@ -269,8 +282,9 @@ class TestEngineRun:
             mock_response = MagicMock()
             mock_response.text = None
             mock_client.models.generate_content.return_value = mock_response
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
-            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": MagicMock()}):
+            with patch.dict("sys.modules", {"google": mock_genai, "google.genai": mock_genai}):
                 engine = Engine(
                     {"endpoint": "gemini-2.0-flash", "media_type": "text"},
                     tmp_path,
@@ -289,16 +303,18 @@ class TestEngineRun:
             mock_response = MagicMock()
             mock_response.text = "Vision result"
             mock_client.models.generate_content.return_value = mock_response
+            mock_genai.genai = mock_genai
             mock_genai.Client.return_value = mock_client
             mock_types = MagicMock()
             mock_part = MagicMock()
             mock_part.text = "text_part"
             mock_types.Part.from_text.return_value = mock_part
             mock_types.Part.from_uri.return_value = MagicMock()
+            mock_genai.types = mock_types
 
             with patch.dict("sys.modules", {
                 "google": mock_genai,
-                "google.genai": MagicMock(),
+                "google.genai": mock_genai,
                 "google.genai.types": mock_types,
             }):
                 engine = Engine(
