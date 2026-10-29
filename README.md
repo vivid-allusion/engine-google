@@ -74,3 +74,7 @@ into `endpoints/` at any time without code changes.
 
 See [ENGINE_CONTRACT.md](https://github.com/vivid-allusion/studiolot/blob/main/docs/architecture/ENGINE_CONTRACT.md)
 in the studiolot repo for the full Engine specification.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
